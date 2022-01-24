@@ -1,6 +1,14 @@
 # op_bridge
 OpenPlanner ROS based bridge for CARLA Simulator and Scenario Runner 
 
+## Support: 
+- CARLA Simulator 0.9.13 release 
+- Python 2.7 
+- ROS 1
+- OpenPlanner.1.13 
+- Linux 18.04
+- To use traffic light detector: CUDA 11.1 + cudnn 8.0.4
+
 Environment setup (bashrc): 
 ```
 export CARLA_ROOT=/home/user/carla-0.9.13/CARLA_0.9.13_RSS
