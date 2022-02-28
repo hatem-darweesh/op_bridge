@@ -1,4 +1,4 @@
-# op_bridge
+# op_bridge - CARLA OpenPlanner Bridge
 OpenPlanner ROS based bridge for CARLA Simulator and Scenario Runner 
 
 ## Support: 
@@ -23,10 +23,14 @@ export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla/dist/carla-0.9.13-py
 ```
 
 How to run the bridge: 
-1- Run CARLA simulator 0.9.13 
-2- Run one of the following options. 
-3- In case of run_srunner_agent.sh, scneario must be started before running the bridge. 
-4- The bridge run script will run the op_agent
+
+1-Run CARLA simulator 0.9.13 
+
+2-Run one of the following options. 
+
+3-In case of run_srunner_agent.sh, scneario must be started before running the bridge. 
+
+4-The bridge run script will run the op_agent
 
 Three options: 
 ```
