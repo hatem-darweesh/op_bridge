@@ -92,7 +92,7 @@ class WorldHandler(object):
     
     def load_world(self):
         client = carla.Client(self._local_host, self._port)
-        client.set_timeout(2)    
+        client.set_timeout(20)    
         
         if self._bridge_mode == 'free' or self._bridge_mode == '':
             client.load_world(self._map_name)                
