@@ -10,27 +10,44 @@
                 "index": 0,
                 "infractions": {
                     "collisions_layout": [],
-                    "collisions_pedestrian": [],
-                    "collisions_vehicle": [],
+                    "collisions_pedestrian": [
+                        "Agent collided against object with type=walker.pedestrian.0040 and id=6044 at (x=2.162, y=307.147, z=0.002)"
+                    ],
+                    "collisions_vehicle": [
+                        "Agent collided against object with type=vehicle.kawasaki.ninja and id=6115 at (x=214.927, y=195.114, z=0.002)",
+                        "Agent collided against object with type=vehicle.kawasaki.ninja and id=6115 at (x=180.096, y=195.176, z=0.002)",
+                        "Agent collided against object with type=vehicle.kawasaki.ninja and id=6115 at (x=157.485, y=195.188, z=0.002)",
+                        "Agent collided against object with type=vehicle.kawasaki.ninja and id=6115 at (x=151.057, y=195.209, z=0.002)",
+                        "Agent collided against object with type=vehicle.kawasaki.ninja and id=6115 at (x=137.792, y=195.298, z=0.002)",
+                        "Agent collided against object with type=vehicle.kawasaki.ninja and id=6115 at (x=131.437, y=195.16, z=0.002)",
+                        "Agent collided against object with type=vehicle.kawasaki.ninja and id=6115 at (x=110.84, y=195.208, z=0.002)",
+                        "Agent collided against object with type=vehicle.volkswagen.t2_2021 and id=6097 at (x=88.369, y=264.379, z=0.002)",
+                        "Agent collided against object with type=vehicle.volkswagen.t2_2021 and id=6097 at (x=88.417, y=304.797, z=0.002)",
+                        "Agent collided against object with type=vehicle.diamondback.century and id=6049 at (x=73.178, y=326.785, z=0.002)",
+                        "Agent collided against object with type=vehicle.diamondback.century and id=6049 at (x=47.608, y=326.569, z=-0.001)",
+                        "Agent collided against object with type=vehicle.volkswagen.t2_2021 and id=6097 at (x=1.885, y=85.86, z=0.002)"
+                    ],
                     "outside_route_lanes": [],
-                    "red_light": [],
+                    "red_light": [
+                        "Agent ran a red light 5897 at (x=341.25, y=209.1, z=0.104)"
+                    ],
                     "route_dev": [],
                     "route_timeout": [],
                     "stop_infraction": [],
                     "vehicle_blocked": []
                 },
                 "meta": {
-                    "duration_game": 21.050000313669443,
-                    "duration_system": 43.07106113433838,
+                    "duration_game": 192.4000028669834,
+                    "duration_system": 362.31037187576294,
                     "route_length": 737.4217028017997
                 },
                 "route_id": "RouteScenario_0",
                 "scores": {
-                    "score_composed": 0.0,
-                    "score_penalty": 1.0,
-                    "score_route": 0.0
+                    "score_composed": 0.07618738175999998,
+                    "score_penalty": 0.0007618738175999998,
+                    "score_route": 100.0
                 },
-                "status": "Failed"
+                "status": "Completed"
             }
         ]
     },

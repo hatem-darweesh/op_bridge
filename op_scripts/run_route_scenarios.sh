@@ -12,6 +12,8 @@ export TEAM_AGENT=${LEADERBOARD_ROOT}/op_bridge/op_ros_agent.py
 export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla/":"${SCENARIO_RUNNER_ROOT}":"${LEADERBOARD_ROOT}":${PYTHONPATH}
 export CHECKPOINT_ENDPOINT=${LEADERBOARD_ROOT}/results.json
 export CHALLENGE_TRACK_CODENAME=MAP
+export AGENT_ROLE_NAME="ego_vehicle"
+export OP_BRIDGE_MODE="leaderboard"
 
 gnome-terminal -- bash -c roscore
 python ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator.py \

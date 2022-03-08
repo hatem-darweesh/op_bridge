@@ -66,6 +66,10 @@ class RosAgent(AutonomousAgent):
         setup agent
         """
         self.track = Track.MAP
+        self.agent_role_name = os.environ['AGENT_ROLE_NAME']
+        self.bridge_mode = os.environ['OP_BRIDGE_MODE']
+        self.topic_base = "/carla/{}".format(self.agent_role_name)
+        self.topic_waypoints = self.topic_base + "/waypoints"
         self.stack_thread = None
         self.counter = 0
         self.open_drive_map_name = None
@@ -110,7 +114,7 @@ class RosAgent(AutonomousAgent):
         self.current_control = carla.VehicleControl()
 
         self.waypoint_publisher = rospy.Publisher(
-            '/carla/ego_vehicle/waypoints', Path, queue_size=1, latch=True)
+            self.topic_waypoints, Path, queue_size=1, latch=True)
 
         self.publisher_map = {}
         self.id_to_sensor_type_map = {}
@@ -123,24 +127,24 @@ class RosAgent(AutonomousAgent):
             self.id_to_sensor_type_map[sensor['id']] = sensor['type']
             if sensor['type'] == 'sensor.camera.rgb':
                 self.publisher_map[sensor['id']] = rospy.Publisher(
-                    '/carla/ego_vehicle/camera/rgb/' + sensor['id'] + "/image_color", Image, queue_size=1, latch=True)
+                    self.topic_base + '/camera/rgb/' + sensor['id'] + "/image_color", Image, queue_size=1, latch=True)
                 self.id_to_camera_info_map[sensor['id']] = self.build_camera_info(sensor)
                 self.publisher_map[sensor['id'] + '_info'] = rospy.Publisher(
-                    '/carla/ego_vehicle/camera/rgb/' + sensor['id'] + "/camera_info", CameraInfo, queue_size=1, latch=True)
+                    self.topic_base + '/camera/rgb/' + sensor['id'] + "/camera_info", CameraInfo, queue_size=1, latch=True)
             elif sensor['type'] == 'sensor.lidar.ray_cast':
                 self.publisher_map[sensor['id']] = rospy.Publisher(
-                    '/carla/ego_vehicle/lidar/' + sensor['id'] + "/point_cloud", PointCloud2, queue_size=1, latch=True)
+                    self.topic_base + '/lidar/' + sensor['id'] + "/point_cloud", PointCloud2, queue_size=1, latch=True)
             elif sensor['type'] == 'sensor.other.gnss':
                 self.publisher_map[sensor['id']] = rospy.Publisher(
-                    '/carla/ego_vehicle/gnss/' + sensor['id'] + "/fix", NavSatFix, queue_size=1, latch=True)
+                    self.topic_base + '/gnss/' + sensor['id'] + "/fix", NavSatFix, queue_size=1, latch=True)
             elif sensor['type'] == 'sensor.speedometer':                
                 if not self.vehicle_status_publisher:
                     self.vehicle_status_publisher = rospy.Publisher(
-                        '/carla/ego_vehicle/odometry', Odometry, queue_size=1, latch=True)
+                        self.topic_base + '/odometry', Odometry, queue_size=1, latch=True)
             elif sensor['type'] == 'sensor.other.imu':                
                 if not self.vehicle_imu_publisher:
                     self.vehicle_imu_publisher = rospy.Publisher(
-                        '/carla/ego_vehicle/imu', Imu, queue_size=1, latch=True)
+                        self.topic_base + '/imu', Imu, queue_size=1, latch=True)
             elif sensor['type'] == 'sensor.opendrive_map':                                
                 if not self.map_file_publisher:
                     self.map_file_publisher = rospy.Publisher('/carla/map_file', String, queue_size=1, latch=True)                
@@ -148,10 +152,10 @@ class RosAgent(AutonomousAgent):
                 raise TypeError("Invalid sensor type: {}".format(sensor['type']))                       
         # pylint: enable=line-too-long
 
-    def init_local_agent(self, role_name, map_name):
+    def init_local_agent(self, role_name, map_name, waypoints_topic_name, enable_explore):
         rospy.loginfo("Executing stack...")
         print("Executing stack...", role_name, map_name)
-        local_start_script = self.start_script + ' ' + role_name + ' ' + map_name
+        local_start_script = self.start_script + ' ' + role_name + ' ' + map_name + ' ' + enable_explore + ' ' + waypoints_topic_name
         self.stack_process = subprocess.Popen(local_start_script, shell=True, preexec_fn=os.setpgrp)
         # self.vehicle_control_event = threading.Event()
 
@@ -384,7 +388,14 @@ class RosAgent(AutonomousAgent):
         town_map_name = self._get_map_name(CarlaDataProvider.get_map().name)
         if self.stack_process is None and town_map_name is not None and self.open_drive_map_data is not None:
             self.write_opendrive_map_file(self.open_drive_map_name, self.open_drive_map_data)
-            self.init_local_agent('ego_vehicle', town_map_name)            
+            if self.bridge_mode == 'free' or self.bridge_mode == 'srunner':
+                self.init_local_agent(self.agent_role_name, town_map_name, '', 'true')
+            elif self.bridge_mode == 'leaderboard':
+                self.init_local_agent(self.agent_role_name, town_map_name, self.topic_waypoints, 'false')
+            else:
+                self.init_local_agent(self.agent_role_name, town_map_name, self.topic_waypoints, 'false')
+
+            
             # publish global plan to ROS once after initialize the stack 
             if self._global_plan_world_coord:                
                 self.publish_plan()
