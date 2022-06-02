@@ -28,4 +28,4 @@ export FREE_MAP_NAME="Town01"
 export FREE_AGENT_POSE=""
 
 gnome-terminal -- bash -c roscore
-python3 ${LEADERBOARD_ROOT}/op_bridge/op_bridge_ros2.py
+python ${LEADERBOARD_ROOT}/op_bridge/op_bridge.py
