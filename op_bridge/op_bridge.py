@@ -142,6 +142,65 @@ class AgentHandler(object):
         if self.ego_vehicle is not None:
             print("Ego Vehicle: " , self.ego_vehicle.attributes['role_name'])
             self._agent_wrapper.setup_sensors(self.ego_vehicle, False)
+            
+            
+            # # Set the vehicle dynamics (physics)
+            # dynamics = self.ego_vehicle.get_physics_control()
+            # dynamics.mass = 5000 
+            # dynamics.drag_coefficient = 0.2
+            # dynamics.clutch_strength = 1.0
+            # dynamics.use_sweep_wheel_collision = 0
+            # dynamics.max_rpm = 0
+            # dynamics.damping_rate_full_throttle = 0.01
+            # front_left_wheel = dynamics.wheels[0]
+            # front_right_wheel = dynamics.wheels[1]
+            # rear_left_wheel = dynamics.wheels[2]
+            # rear_right_wheel = dynamics.wheels[3]
+
+            # front_left_wheel.tire_friction = tire_friction
+            # front_left_wheel.long_stiff_value = long_stiff
+            # front_left_wheel.lat_stiff_value  = lat_stiff
+            # front_left_wheel.lat_stiff_max_load  = lat_load
+
+            # torque_curve (list(carla.Vector2D))
+# Curve that indicates the torque measured in Nm for a specific RPM of the vehicle's engine.
+# max_rpm (float)
+# The maximum RPM of the vehicle's engine.
+# moi (float - kg*m2)
+# The moment of inertia of the vehicle's engine.
+# damping_rate_full_throttle (float)
+# Damping ratio when the throttle is maximum.
+# damping_rate_zero_throttle_clutch_engaged (float)
+# Damping ratio when the throttle is zero with clutch engaged.
+# damping_rate_zero_throttle_clutch_disengaged (float)
+# Damping ratio when the throttle is zero with clutch disengaged.
+# use_gear_autobox (bool)
+# If True, the vehicle will have an automatic transmission.
+# gear_switch_time (float - seconds)
+# Switching time between gears.
+# clutch_strength (float - kg*m2/s)
+# Clutch strength of the vehicle.
+# final_ratio (float)
+# Fixed ratio from transmission to wheels.
+# forward_gears (list(carla.GearPhysicsControl))
+# List of objects defining the vehicle's gears.
+# mass (float - kilograms)
+# Mass of the vehicle.
+# drag_coefficient (float)
+# Drag coefficient of the vehicle's chassis.
+# center_of_mass (carla.Vector3D - meters)
+# Center of mass of the vehicle.
+# steering_curve (list(carla.Vector2D))
+# Curve that indicates the maximum steering for a specific forward speed.
+# use_sweep_wheel_collision (bool)
+# Enable the use of sweep for wheel collision. By default, it is disabled and it uses a simple raycast from the axis to the floor for each wheel. This option provides a better collision model in which the full volume of the wheel is checked against collisions.
+# wheels (list(carla.WheelPhysicsControl))
+# List of wheel physics objects. This list should have 4 elements, where index 0 corresponds to the front left wheel, index 1 corresponds to the front right wheel, index 2 corresponds to the back left wheel and index 3 corresponds to the back right wheel. For 2 wheeled vehicles, set the same values for both front and back wheels.
+            
+            # wheels = [front_left_wheel, front_right_wheel, rear_left_wheel, rear_right_wheel]
+            # dynamics.wheels = wheels
+            # self.ego_vehicle.apply_physics_control(dynamics)
+
         else:
             print("Can't Load Ego Vehicle !! Agent will exit ")
             CarlaDataProvider.cleanup()
