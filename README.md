@@ -4,9 +4,9 @@ OpenPlanner ROS based bridge for CARLA Simulator and Scenario Runner
 ## Support: 
 - CARLA Simulator 0.9.13 release 
 - Python 2.7 
-- ROS 1
-- OpenPlanner.1.13 
-- Linux 18.04
+- ROS1/ROS2
+- OpenPlanner.1.13 / OpenPlanner.Universe
+- Linux 18.04 / Linux 20.04
 - To use traffic light detector: CUDA 11.1 + cudnn 8.0.4
 
 Environment setup (bashrc): 
@@ -22,19 +22,23 @@ export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla/agents
 export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla/dist/carla-0.9.13-py2.7-linux-x86_64.egg
 ```
 
-How to run the bridge: 
+**How to run the bridge: **
 
 1-Run CARLA simulator 0.9.13 
-
 2-Run one of the following options. 
-
 3-In case of run_srunner_agent.sh, scneario must be started before running the bridge. 
-
 4-The bridge run script will run the op_agent
 
-Three options: 
+**Options(ROS1):** 
 ```
 ./op_scripts/run_exploration_mode.sh
 ./op_scripts/run_srunner_agent.sh
 ./op_scripts/run_route_scenarios.sh
+```
+
+**Options(ROS2):** 
+```
+./op_scripts/run_exploration_mode_ros2.sh
+./op_scripts/run_srunner_agent_ros2.sh
+./op_scripts/run_route_scenarios_ros2.sh
 ```
