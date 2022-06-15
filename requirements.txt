@@ -4,3 +4,4 @@ opencv-python==4.2.0.32
 pygame
 tabulate
 rospkg
+transforms3d

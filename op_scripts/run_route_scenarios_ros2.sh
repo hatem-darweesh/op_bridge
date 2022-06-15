@@ -16,7 +16,7 @@ export AGENT_ROLE_NAME="ego_vehicle"
 export OP_BRIDGE_MODE="leaderboard"
 
 gnome-terminal -- bash -c roscore
-python ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator.py \
+python3 ${LEADERBOARD_ROOT}/leaderboard/leaderboard_evaluator.py \
 --scenarios=${SCENARIOS}  \
 --routes=${ROUTES} \
 --repetitions=${REPETITIONS} \

@@ -4,11 +4,11 @@
             "index": -1,
             "infractions": {
                 "collisions_layout": 0.0,
-                "collisions_pedestrian": 5.292120470579783,
-                "collisions_vehicle": 0.0,
-                "outside_route_lanes": 2.6460602352898914,
+                "collisions_pedestrian": 0.0,
+                "collisions_vehicle": 2.841290475015719,
+                "outside_route_lanes": 2.841290475015719,
                 "red_light": 0.0,
-                "route_dev": 2.6460602352898914,
+                "route_dev": 0.0,
                 "route_timeout": 0.0,
                 "stop_infraction": 0.0,
                 "vehicle_blocked": 0.0
@@ -18,35 +18,35 @@
                     [
                         "RouteScenario_0",
                         0,
-                        "Failed - Agent couldn't be set up"
+                        "Failed"
                     ],
                     [
                         "RouteScenario_1",
                         1,
-                        "Failed - Agent deviated from the route"
+                        "Failed - Agent couldn't be set up"
                     ],
                     [
                         "RouteScenario_2",
                         2,
-                        "Failed"
+                        "Failed - Agent couldn't be set up"
                     ],
                     [
                         "RouteScenario_3",
                         3,
-                        "Failed"
+                        "Failed - Agent couldn't be set up"
                     ]
                 ]
             },
             "route_id": -1,
             "scores": {
-                "score_composed": 2.715349726990907,
-                "score_penalty": 0.8064793214949837,
-                "score_route": 9.197122285096064
+                "score_composed": 6.744800922213607,
+                "score_penalty": 0.8913190424671991,
+                "score_route": 11.93186849496789
             },
             "scores_std_dev": {
-                "score_composed": 3.5878910273146998,
-                "score_penalty": 0.38704135701003256,
-                "score_route": 16.272170901422072
+                "score_composed": 13.489601844427215,
+                "score_penalty": 0.21736191506560187,
+                "score_route": 23.86373698993578
             },
             "status": "Failed"
         },
@@ -57,6 +57,36 @@
         "records": [
             {
                 "index": 0,
+                "infractions": {
+                    "collisions_layout": [],
+                    "collisions_pedestrian": [],
+                    "collisions_vehicle": [
+                        "Agent collided against object with type=vehicle.jeep.wrangler_rubicon and id=3029 at (x=118.061, y=196.243, z=0.002)"
+                    ],
+                    "outside_route_lanes": [
+                        "Agent went outside its route lanes for about 21.0 meters (5.79% of the completed route)"
+                    ],
+                    "red_light": [],
+                    "route_dev": [],
+                    "route_timeout": [],
+                    "stop_infraction": [],
+                    "vehicle_blocked": []
+                },
+                "meta": {
+                    "duration_game": 147.05000219121575,
+                    "duration_system": 387.3892288208008,
+                    "route_length": 737.4217028017997
+                },
+                "route_id": "RouteScenario_0",
+                "scores": {
+                    "score_composed": 26.97920368885443,
+                    "score_penalty": 0.5652761698687963,
+                    "score_route": 47.72747397987156
+                },
+                "status": "Failed"
+            },
+            {
+                "index": 1,
                 "infractions": {
                     "collisions_layout": [],
                     "collisions_pedestrian": [],
@@ -71,48 +101,15 @@
                 "meta": {
                     "duration_game": 0.0,
                     "duration_system": 0.0,
-                    "route_length": 737.4217028017997
+                    "route_length": 1128.3240988201576
                 },
-                "route_id": "RouteScenario_0",
+                "route_id": "RouteScenario_1",
                 "scores": {
                     "score_composed": 0.0,
                     "score_penalty": 1.0,
                     "score_route": 0.0
                 },
                 "status": "Failed - Agent couldn't be set up"
-            },
-            {
-                "index": 1,
-                "infractions": {
-                    "collisions_layout": [],
-                    "collisions_pedestrian": [
-                        "Agent collided against object with type=walker.pedestrian.0042 and id=307 at (x=153.345, y=207.159, z=2.491)",
-                        "Agent collided against object with type=walker.pedestrian.0038 and id=288 at (x=246.526, y=101.559, z=0.342)"
-                    ],
-                    "collisions_vehicle": [],
-                    "outside_route_lanes": [
-                        "Agent went outside its route lanes for about 38.753 meters (9.63% of the completed route)"
-                    ],
-                    "red_light": [],
-                    "route_dev": [
-                        "Agent deviated from the route at (x=238.936, y=31.596, z=0.002)"
-                    ],
-                    "route_timeout": [],
-                    "stop_infraction": [],
-                    "vehicle_blocked": []
-                },
-                "meta": {
-                    "duration_game": 44.90000066906214,
-                    "duration_system": 41.771238565444946,
-                    "route_length": 1128.3240988201576
-                },
-                "route_id": "RouteScenario_1",
-                "scores": {
-                    "score_composed": 7.566863014219843,
-                    "score_penalty": 0.22591728597993485,
-                    "score_route": 33.49395324664047
-                },
-                "status": "Failed - Agent deviated from the route"
             },
             {
                 "index": 2,
@@ -128,17 +125,17 @@
                     "vehicle_blocked": []
                 },
                 "meta": {
-                    "duration_game": 11.400000169873238,
-                    "duration_system": 15.378871202468872,
+                    "duration_game": 0.0,
+                    "duration_system": 0.0,
                     "route_length": 2628.0801981075497
                 },
                 "route_id": "RouteScenario_2",
                 "scores": {
-                    "score_composed": 3.294535893743785,
+                    "score_composed": 0.0,
                     "score_penalty": 1.0,
-                    "score_route": 3.294535893743785
+                    "score_route": 0.0
                 },
-                "status": "Failed"
+                "status": "Failed - Agent couldn't be set up"
             },
             {
                 "index": 3,
@@ -154,17 +151,17 @@
                     "vehicle_blocked": []
                 },
                 "meta": {
-                    "duration_game": 1.0500000156462193,
-                    "duration_system": 1.236469030380249,
+                    "duration_game": 0.0,
+                    "duration_system": 0.0,
                     "route_length": 1129.3702320707187
                 },
                 "route_id": "RouteScenario_3",
                 "scores": {
                     "score_composed": 0.0,
                     "score_penalty": 1.0,
-                    "score_route": 0
+                    "score_route": 0.0
                 },
-                "status": "Failed"
+                "status": "Failed - Agent couldn't be set up"
             }
         ]
     },
@@ -184,18 +181,25 @@
         "Route timeouts",
         "Agent blocked"
     ],
-    "sensors": [],
+    "sensors": [
+        "carla_camera",
+        "carla_lidar",
+        "carla_gnss",
+        "carla_opendrive_map",
+        "carla_speedometer",
+        "carla_imu"
+    ],
     "values": [
-        "2.715",
-        "9.197",
-        "0.806",
-        "5.292",
+        "6.745",
+        "11.932",
+        "0.891",
+        "0.000",
+        "2.841",
         "0.000",
         "0.000",
         "0.000",
+        "2.841",
         "0.000",
-        "2.646",
-        "2.646",
         "0.000",
         "0.000"
     ]

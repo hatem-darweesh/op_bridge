@@ -127,7 +127,7 @@ class RosAgent(AutonomousAgent):
             self.id_to_sensor_type_map[sensor['id']] = sensor['type']
             if sensor['type'] == 'sensor.camera.rgb':
                 self.publisher_map[sensor['id']] = rospy.Publisher(
-                    self.topic_base + '/camera/rgb/' + sensor['id'] + "/image_color", Image, queue_size=1, latch=True)
+                    self.topic_base + '/camera/rgb/' + sensor['id'] + "/image_raw", Image, queue_size=1, latch=True)
                 self.id_to_camera_info_map[sensor['id']] = self.build_camera_info(sensor)
                 self.publisher_map[sensor['id'] + '_info'] = rospy.Publisher(
                     self.topic_base + '/camera/rgb/' + sensor['id'] + "/camera_info", CameraInfo, queue_size=1, latch=True)
