@@ -404,16 +404,16 @@ class Ros2Agent(AutonomousAgent):
         # Here, these measurements are converted to the right-handed ROS convention
         #  (X forward, Y left, Z up).
         imu_msg.linear_acceleration.x = data[0]
-        imu_msg.linear_acceleration.y = -data[1]
+        imu_msg.linear_acceleration.y = data[1]
         imu_msg.linear_acceleration.z = data[2]
         
-        imu_msg.angular_velocity.x = -data[3]
+        imu_msg.angular_velocity.x = data[3]
         imu_msg.angular_velocity.y = data[4]
-        imu_msg.angular_velocity.z = -data[5]
+        imu_msg.angular_velocity.z = data[5]
         
         imu_rotation = data[6]
 
-        quaternion = euler2quat(0, 0, -math.radians(imu_rotation))
+        quaternion = euler2quat(0, 0, math.radians(imu_rotation))
         imu_msg.orientation.x = quaternion[0]
         imu_msg.orientation.y = quaternion[1]
         imu_msg.orientation.z = quaternion[2]
@@ -447,12 +447,13 @@ class Ros2Agent(AutonomousAgent):
         # status_twist.twist.twist.linear.x = data['speed']
         # self.vehicle_twist_publisher.publish(status_twist)
 
-        # vel_rep = VelocityReport()
-        # vel_rep.header = self.get_header()
-        # vel_rep.header.frame_id = "base_link"
-        # vel_rep.longitudinal_velocity = data['speed'];                                 
+        vel_rep = VelocityReport()
+        vel_rep.header = self.get_header()
+        vel_rep.header.frame_id = "base_link"
+        vel_rep.longitudinal_velocity = data['speed'];                                 
         # vel_rep.heading_rate = data['speed'] * np.tan(self.current_control.steer) / 1.8;  
-        # self.auto_velocity_status_publisher.publish(vel_rep)
+        vel_rep.heading_rate = 0.0
+        self.auto_velocity_status_publisher.publish(vel_rep)
 
         # steer_rep = SteeringReport()
         # steer_rep.steering_tire_angle = self.current_control.steer

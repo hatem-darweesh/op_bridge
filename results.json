@@ -5,9 +5,9 @@
             "infractions": {
                 "collisions_layout": 0.0,
                 "collisions_pedestrian": 0.0,
-                "collisions_vehicle": 2.841290475015719,
-                "outside_route_lanes": 2.841290475015719,
-                "red_light": 0.0,
+                "collisions_vehicle": 5.0742743974374225,
+                "outside_route_lanes": 0.0,
+                "red_light": 5.0742743974374225,
                 "route_dev": 0.0,
                 "route_timeout": 0.0,
                 "stop_infraction": 0.0,
@@ -39,14 +39,14 @@
             },
             "route_id": -1,
             "scores": {
-                "score_composed": 6.744800922213607,
-                "score_penalty": 0.8913190424671991,
-                "score_route": 11.93186849496789
+                "score_composed": 2.8060760401182874,
+                "score_penalty": 0.855,
+                "score_route": 6.681133428853066
             },
             "scores_std_dev": {
-                "score_composed": 13.489601844427215,
-                "score_penalty": 0.21736191506560187,
-                "score_route": 23.86373698993578
+                "score_composed": 5.612152080236574,
+                "score_penalty": 0.29000000000000004,
+                "score_route": 13.362266857706132
             },
             "status": "Failed"
         },
@@ -61,27 +61,27 @@
                     "collisions_layout": [],
                     "collisions_pedestrian": [],
                     "collisions_vehicle": [
-                        "Agent collided against object with type=vehicle.jeep.wrangler_rubicon and id=3029 at (x=118.061, y=196.243, z=0.002)"
+                        "Agent collided against object with type=vehicle.ford.crown and id=271 at (x=162.13, y=195.071, z=0.002)"
                     ],
-                    "outside_route_lanes": [
-                        "Agent went outside its route lanes for about 21.0 meters (5.79% of the completed route)"
+                    "outside_route_lanes": [],
+                    "red_light": [
+                        "Agent ran a red light 53 at (x=341.25, y=209.1, z=0.104)"
                     ],
-                    "red_light": [],
                     "route_dev": [],
                     "route_timeout": [],
                     "stop_infraction": [],
                     "vehicle_blocked": []
                 },
                 "meta": {
-                    "duration_game": 147.05000219121575,
-                    "duration_system": 387.3892288208008,
+                    "duration_game": 75.60000112652779,
+                    "duration_system": 229.2877116203308,
                     "route_length": 737.4217028017997
                 },
                 "route_id": "RouteScenario_0",
                 "scores": {
-                    "score_composed": 26.97920368885443,
-                    "score_penalty": 0.5652761698687963,
-                    "score_route": 47.72747397987156
+                    "score_composed": 11.22430416047315,
+                    "score_penalty": 0.42,
+                    "score_route": 26.724533715412264
                 },
                 "status": "Failed"
             },
@@ -190,15 +190,15 @@
         "carla_imu"
     ],
     "values": [
-        "6.745",
-        "11.932",
-        "0.891",
+        "2.806",
+        "6.681",
+        "0.855",
         "0.000",
-        "2.841",
+        "5.074",
+        "0.000",
+        "5.074",
         "0.000",
         "0.000",
-        "0.000",
-        "2.841",
         "0.000",
         "0.000",
         "0.000"
