@@ -92,7 +92,7 @@ class WorldHandler(object):
     
     def load_world(self):
         client = carla.Client(self._local_host, self._port)
-        client.set_timeout(2)    
+        client.set_timeout(20)    
         
         if self._bridge_mode == 'free' or self._bridge_mode == '':
             client.load_world(self._map_name)                
@@ -120,7 +120,7 @@ class WorldHandler(object):
                 else:
                     _randomize = True                
             
-                CarlaDataProvider.request_new_actor('vehicle.audi.tt', spawn_point, self._agent_role_name, random_location=_randomize)            
+                CarlaDataProvider.request_new_actor('vehicle.toyota.prius', spawn_point, self._agent_role_name, random_location=_randomize)            
         else:
             print("Can't Load CARLA .. make sure that Simulator is running !!")  
 

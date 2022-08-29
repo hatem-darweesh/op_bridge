@@ -36,7 +36,10 @@ from sensor_msgs_py.point_cloud2 import create_cloud
 from std_msgs.msg import Header, String
 from srunner.scenariomanager.carla_data_provider import *
 from leaderboard.autoagents.autonomous_agent import AutonomousAgent, Track
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from autoware_auto_vehicle_msgs.msg import ControlModeReport, GearReport, SteeringReport, TurnIndicatorsReport, HazardLightsReport, VelocityReport
+from autoware_auto_control_msgs.msg import AckermannControlCommand
+
 
 def get_entry_point():
     return 'Ros2Agent'
@@ -69,6 +72,8 @@ class Ros2Agent(AutonomousAgent):
     counter = 0
     open_drive_map_data = None
     open_drive_map_name = None
+    steering_factor = 0.45
+    max_steer_angle = 0.7
 
     def setup(self, path_to_conf_file):
         """
@@ -92,20 +97,9 @@ class Ros2Agent(AutonomousAgent):
         if not os.path.exists(self.start_script):
             raise IOError("File '{}' defined by TEAM_CODE_ROOT invalid".format(self.start_script))
 
-        # # set use_sim_time via commandline before init-node
-        # process = subprocess.Popen(
-        #     "rosparam set use_sim_time true", shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
-        # process.wait()
-        # if process.returncode:
-        #     raise RuntimeError("Could not set use_sim_time")
-
         # initialize ros2 node
         rclpy.init(args=None)
         self.ros2_node = rclpy.create_node("op_ros2_agent")
-        
-        # # publish first clock value '0'
-        # self.clock_publisher = rospy.Publisher('clock', Clock, queue_size=10
-        # self.clock_publisher.publish(Clock(rospy.Time.from_sec(0)))
 
         self.clock_publisher = self.ros2_node.create_publisher(Clock, "/clock", 10)
         obj_clock = Clock()
@@ -119,44 +113,49 @@ class Ros2Agent(AutonomousAgent):
         
         self.vehicle_status_publisher = None     
         self.auto_velocity_status_publisher = None 
-        self.auto_steering_status_publisher = None       
+        self.auto_steering_status_publisher = None  
+        self.auto_gear_status_publisher = None
+        self.auto_control_mode_publisher = None
+
         self.vehicle_twist_publisher = None        
         self.vehicle_imu_publisher = None              
         self.map_file_publisher = None
         self.current_map_name = None        
         self.step_mode_possible = False
-
-
-        # self.vehicle_control_subscriber = rospy.Subscriber(
-        #     '/carla_op_controller_cmd', TwistStamped, self.on_vehicle_control)
-
-        self.vehicle_control_subscriber = self.ros2_node.create_subscription(
-            TwistStamped,
-            '/carla_op_controller_cmd',
-            self.on_vehicle_control,
-            10)
-
-        self.current_control = carla.VehicleControl()
-
-        self.waypoint_publisher = self.ros2_node.create_publisher(
-            Path, self.topic_waypoints, 1)
+        self.perception_cloud_publisher = None
+        self.localization_cloud_publisher = None
+        self.sensing_cloud_publisher = None
 
         self.publisher_map = {}
         self.id_to_sensor_type_map = {}
         self.id_to_camera_info_map = {}
         self.cv_bridge = CvBridge()
 
+        # self.qos_profile = QoSProfile(depth=1)
+        # self.qos_profile.durability = DurabilityPolicy.TRANSIENT_LOCAL
+        
+        self.vehicle_control_subscriber = self.ros2_node.create_subscription(
+            TwistStamped, '/carla_op_controller_cmd', self.on_vehicle_control, 1)
+        
+        self.autoware_universe_vehicle_control_subscriber = self.ros2_node.create_subscription(
+            AckermannControlCommand, 'control/command/control_cmd', self.on_autoware_universe_vehicle_control,
+            qos_profile=QoSProfile(depth=1))
+
+        self.current_control = carla.VehicleControl()
+
+        self.waypoint_publisher = self.ros2_node.create_publisher(Path, self.topic_waypoints, 1)
+
         for sensor in self.sensors():
             self.id_to_sensor_type_map[sensor['id']] = sensor['type']
             if sensor['type'] == 'sensor.camera.rgb':
                 self.publisher_map[sensor['id']] = self.ros2_node.create_publisher(
-                    Image, "/image_color", 1)
+                    Image, "/sensing/camera/traffic_light/image_raw", 1)
                 self.id_to_camera_info_map[sensor['id']] = self.build_camera_info(sensor)
                 self.publisher_map[sensor['id'] + '_info'] = self.ros2_node.create_publisher(
-                    CameraInfo, "/camera_info", 1)
+                    CameraInfo, "/sensing/camera/traffic_light/camera_info", 1)
             elif sensor['type'] == 'sensor.lidar.ray_cast':
-                self.publisher_map[sensor['id']] = self.ros2_node.create_publisher(
-                    PointCloud2, "/points_raw", 10)
+                self.sensing_cloud_publisher = self.ros2_node.create_publisher(
+                    PointCloud2, '/carla_pointcloud', 10)
             elif sensor['type'] == 'sensor.other.gnss':
                 self.publisher_map[sensor['id']] = self.ros2_node.create_publisher(
                     NavSatFix,  "/sensing/gnss/ublox/nav_sat_fix", 1)
@@ -170,6 +169,12 @@ class Ros2Agent(AutonomousAgent):
                 if not self.auto_steering_status_publisher:
                     self.auto_steering_status_publisher = self.ros2_node.create_publisher(
                         SteeringReport, '/vehicle/status/steering_status', 1)
+                if not self.auto_gear_status_publisher:
+                    self.auto_gear_status_publisher = self.ros2_node.create_publisher(
+                        GearReport, '/vehicle/status/gear_status', 1)
+                if not self.auto_control_mode_publisher:
+                    self.auto_control_mode_publisher = self.ros2_node.create_publisher(
+                        ControlModeReport, '/vehicle/status/control_mode', 1)
                 # if not self.vehicle_twist_publisher:
                 #     self.vehicle_twist_publisher = self.ros2_node.create_publisher(
                 #         TwistWithCovarianceStamped, '/localization/twist_estimator/vehicle_velocity_converter/twist_with_covariance', 1)                                                
@@ -182,37 +187,9 @@ class Ros2Agent(AutonomousAgent):
                     self.map_file_publisher = self.ros2_node.create_publisher(String, '/carla/map_file', 1)                
             else:
                 raise TypeError("Invalid sensor type: {}".format(sensor['type']))    
-
-        # setup ros publishers for sensors
-        # pylint: disable=line-too-long
-        # for sensor in self.sensors():
-        #     self.id_to_sensor_type_map[sensor['id']] = sensor['type']
-        #     if sensor['type'] == 'sensor.camera.rgb':
-        #         self.publisher_map[sensor['id']] = self.ros2_node.create_publisher(
-        #             Image, self.topic_base + '/camera/rgb/' + sensor['id'] + "/image_color", 1)
-        #         self.id_to_camera_info_map[sensor['id']] = self.build_camera_info(sensor)
-        #         self.publisher_map[sensor['id'] + '_info'] = self.ros2_node.create_publisher(
-        #             CameraInfo, self.topic_base + '/camera/rgb/' + sensor['id'] + "/camera_info", 1)
-        #     elif sensor['type'] == 'sensor.lidar.ray_cast':
-        #         self.publisher_map[sensor['id']] = self.ros2_node.create_publisher(
-        #             PointCloud2, self.topic_base + '/lidar/' + sensor['id'] + "/point_cloud", 1)
-        #     elif sensor['type'] == 'sensor.other.gnss':
-        #         self.publisher_map[sensor['id']] = self.ros2_node.create_publisher(
-        #             NavSatFix, self.topic_base + '/gnss/' + sensor['id'] + "/fix", 1)
-        #     elif sensor['type'] == 'sensor.speedometer':                
-        #         if not self.vehicle_status_publisher:
-        #             self.vehicle_status_publisher = self.ros2_node.create_publisher(
-        #                 Odometry, self.topic_base + '/odometry', 1)
-        #     elif sensor['type'] == 'sensor.other.imu':                
-        #         if not self.vehicle_imu_publisher:
-        #             self.vehicle_imu_publisher = self.ros2_node.create_publisher(
-        #                 Imu, self.topic_base + '/imu', 1)
-        #     elif sensor['type'] == 'sensor.opendrive_map':                                
-        #         if not self.map_file_publisher:
-        #             self.map_file_publisher = self.ros2_node.create_publisher(String, '/carla/map_file', 1)                
-        #     else:
-        #         raise TypeError("Invalid sensor type: {}".format(sensor['type']))                       
-        # pylint: enable=line-too-long
+        
+        self.spin_thread = threading.Thread(target=rclpy.spin, args=(self.ros2_node,))
+        self.spin_thread.start()
 
     def init_local_agent(self, role_name, map_name, waypoints_topic_name, enable_explore):
         # rospy.loginfo("Executing stack...")
@@ -231,7 +208,32 @@ class Ros2Agent(AutonomousAgent):
         f = open(opendrive_map_path, "w")
         f.write(map_data)
         f.close()
+    
+    def on_autoware_universe_vehicle_control(self, data):
         
+        # print(' $$$$$$$$$$$$$ >>>> Steering Angle: ', data.lateral.steering_tire_angle)
+        
+        cmd = carla.VehicleControl()  
+
+        cmd.steer = (-data.lateral.steering_tire_angle / self.max_steer_angle)*self.steering_factor
+        speed_diff = data.longitudinal.speed - self.speed 
+        if speed_diff > 0:            
+            cmd.throttle = 0.75           
+            cmd.brake = 0.0   
+        elif speed_diff < 0.0:
+            cmd.throttle = 0.0
+            if data.longitudinal.speed <= 0.0 :                
+                cmd.brake = 0.75  
+            elif  speed_diff > -1:
+                cmd.brake = 0.0
+            else :
+                cmd.brake = 0.01
+
+        # cmd.steer = -data.lateral.steering_tire_rotation_angle 
+        self.current_control = cmd
+        self.step_mode_possible = True
+
+
     def on_vehicle_control(self, data):
         """
         callback if a new vehicle control command is received
@@ -302,15 +304,15 @@ class Ros2Agent(AutonomousAgent):
         self.waypoint_publisher.publish(msg)
 
     def sensors(self):
-        sensors = [{'type': 'sensor.camera.rgb', 'x': 0.7, 'y': 0.0, 'z': 1.60, 'roll': 0.0, 'pitch': 0.0, 'yaw': 0.0,
+        sensors = [{'type': 'sensor.camera.rgb', 'x': 0.7, 'y': 0.0, 'z': 1.6, 'roll': 0.0, 'pitch': 0.0, 'yaw': 0.0,
             'width': 1280, 'height': 720, 'fov': 100, 'id': 'Center'},
             {'type': 'sensor.lidar.ray_cast', 'x': 0.0, 'y': 0.0, 'z': 2.4, 'roll': 0.0, 'pitch': 0.0,
-             'yaw': 180, 'id': 'LIDAR'},
-            {'type': 'sensor.other.gnss', 'x': 0.0, 'y': 0.0, 'z': 1.8, 'id': 'GPS'},
+             'yaw': 270.0, 'id': 'LIDAR'},
+            {'type': 'sensor.other.gnss', 'x': 0.0, 'y': 0.0, 'z': 2.4, 'id': 'GPS'},
             {'type': 'sensor.opendrive_map', 'reading_frequency': 1, 'id': 'OpenDRIVE'},
             {'type': 'sensor.speedometer', 'reading_frequency': 10, 'id': 'speed'},
-            {'type': 'sensor.other.imu', 'x': 0.0, 'y': 0.0, 'z': 1.60, 'roll': 0.0, 'pitch': 0.0,
-             'yaw': 180.0, 'id': 'IMU'},
+            {'type': 'sensor.other.imu', 'x': 0.0, 'y': 0.0, 'z': 2.4, 'roll': 0.0, 'pitch': 0.0,
+             'yaw': 270.0, 'id': 'IMU'},
             ]
         return sensors
 
@@ -331,7 +333,6 @@ class Ros2Agent(AutonomousAgent):
         Function to publish lidar data
         """
         header = self.get_header()
-        header.frame_id = 'velodyne_top'
         lidar_data = numpy.frombuffer(data, dtype=numpy.float32)
 
         if lidar_data.shape[0] % 4 == 0:
@@ -357,8 +358,16 @@ class Ros2Agent(AutonomousAgent):
                         PointField(name='intensity', offset=12,
                          datatype=PointField.FLOAT32, count=1)]
 
+            # header.frame_id = 'velodyne_top'
+            # msg = create_cloud(header,fields, lidar_data)
+            # self.localization_cloud_publisher.publish(msg)
+            # header.frame_id = 'velodyne_top'
+            # concat_msg = create_cloud(header,fields, lidar_data)
+            # self.perception_cloud_publisher.publish(concat_msg)
+
+            header.frame_id = 'velodyne_top'
             msg = create_cloud(header,fields, lidar_data)
-            self.publisher_map[sensor_id].publish(msg)
+            self.sensing_cloud_publisher.publish(msg)   
         else:
             print('Cannot Reshape LIDAR Data buffer')
 
@@ -385,7 +394,7 @@ class Ros2Agent(AutonomousAgent):
         msg = self.cv_bridge.cv2_to_imgmsg(data, encoding='bgra8')
         # the camera data is in respect to the camera's own frame
         msg.header = self.get_header()
-        msg.header.frame_id = 'camera'
+        msg.header.frame_id = 'camera4/camera_link'
 
         cam_info = self.id_to_camera_info_map[sensor_id]
         cam_info.header = msg.header
@@ -404,16 +413,16 @@ class Ros2Agent(AutonomousAgent):
         # Here, these measurements are converted to the right-handed ROS convention
         #  (X forward, Y left, Z up).
         imu_msg.linear_acceleration.x = data[0]
-        imu_msg.linear_acceleration.y = data[1]
+        imu_msg.linear_acceleration.y = -data[1]
         imu_msg.linear_acceleration.z = data[2]
         
-        imu_msg.angular_velocity.x = data[3]
+        imu_msg.angular_velocity.x = -data[3]
         imu_msg.angular_velocity.y = data[4]
-        imu_msg.angular_velocity.z = data[5]
+        imu_msg.angular_velocity.z = -data[5]
         
         imu_rotation = data[6]
 
-        quaternion = euler2quat(0, 0, math.radians(imu_rotation))
+        quaternion = euler2quat(0, 0, -math.radians(imu_rotation))
         imu_msg.orientation.x = quaternion[0]
         imu_msg.orientation.y = quaternion[1]
         imu_msg.orientation.z = quaternion[2]
@@ -426,6 +435,7 @@ class Ros2Agent(AutonomousAgent):
         publish can data
         """    
 
+        self.speed = data['speed']
         twist_msg = TwistWithCovariance()        
         twist_msg.twist.linear.x = data['speed']        
         if twist_msg.twist.linear.x < 0.0:
@@ -438,7 +448,7 @@ class Ros2Agent(AutonomousAgent):
         odo_msg = Odometry()
         odo_msg.header = self.get_header()
         odo_msg.twist = twist_msg
-        self.vehicle_status_publisher.publish(odo_msg)
+        # self.vehicle_status_publisher.publish(odo_msg)
 
         #send to autoware.universe 
         # status_twist = TwistWithCovarianceStamped()        
@@ -455,9 +465,17 @@ class Ros2Agent(AutonomousAgent):
         vel_rep.heading_rate = 0.0
         self.auto_velocity_status_publisher.publish(vel_rep)
 
-        # steer_rep = SteeringReport()
-        # steer_rep.steering_tire_angle = self.current_control.steer
-        # self.auto_steering_status_publisher.publish(steer_rep)
+        steer_rep = SteeringReport()
+        steer_rep.steering_tire_angle = (-self.current_control.steer * self.max_steer_angle)/self.steering_factor
+        self.auto_steering_status_publisher.publish(steer_rep)
+
+        gear_rep = GearReport()
+        gear_rep.report = GearReport.DRIVE
+        self.auto_gear_status_publisher.publish(gear_rep)
+
+        control_mode_rep = ControlModeReport()
+        control_mode_rep.mode = ControlModeReport.AUTONOMOUS
+        self.auto_control_mode_publisher.publish(control_mode_rep)
         
 
     def publish_hd_map(self, sensor_id, data, map_name):
