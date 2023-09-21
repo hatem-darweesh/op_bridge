@@ -27,7 +27,7 @@ from rclpy.qos import DurabilityPolicy, QoSProfile
 from rclpy.task import Future
 
 from cv_bridge import CvBridge
-from geometry_msgs.msg import PoseStamped, TwistWithCovariance, TwistStamped, TwistWithCovarianceStamped
+from geometry_msgs.msg import PoseStamped, TwistWithCovariance, TwistStamped, TwistWithCovarianceStamped, PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry, Path
 from rosgraph_msgs.msg import Clock
 from builtin_interfaces.msg import Time
@@ -39,6 +39,7 @@ from leaderboard.autoagents.autonomous_agent import AutonomousAgent, Track
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from autoware_auto_vehicle_msgs.msg import ControlModeReport, GearReport, SteeringReport, TurnIndicatorsReport, HazardLightsReport, VelocityReport
 from autoware_auto_control_msgs.msg import AckermannControlCommand
+import trans_utils as trans
 
 
 def get_entry_point():
@@ -131,6 +132,8 @@ class Ros2Agent(AutonomousAgent):
         self.id_to_camera_info_map = {}
         self.cv_bridge = CvBridge()
 
+        self.ego_vehicle = self.get_ego_vehicle()
+
         # self.qos_profile = QoSProfile(depth=1)
         # self.qos_profile.durability = DurabilityPolicy.TRANSIENT_LOCAL
         
@@ -140,6 +143,9 @@ class Ros2Agent(AutonomousAgent):
         self.autoware_universe_vehicle_control_subscriber = self.ros2_node.create_subscription(
             AckermannControlCommand, 'control/command/control_cmd', self.on_autoware_universe_vehicle_control,
             qos_profile=QoSProfile(depth=1))
+        
+        self.vehicle_initialpose_subscriber = self.ros2_node.create_subscription(
+            PoseWithCovarianceStamped , 'initialpose', self.on_initialpose_callback, 1)
 
         self.current_control = carla.VehicleControl()
 
@@ -190,6 +196,24 @@ class Ros2Agent(AutonomousAgent):
         
         self.spin_thread = threading.Thread(target=rclpy.spin, args=(self.ros2_node,))
         self.spin_thread.start()
+
+    def get_ego_vehicle(self):
+        for car in CarlaDataProvider.get_world().get_actors().filter('vehicle.*'):
+            if car.attributes['role_name'] == self.agent_role_name:
+                return car
+        return None
+
+    def on_initialpose_callback(self, data:PoseWithCovarianceStamped ):
+        """
+        callback if a initialpose msg is received
+        """       
+        pose = data.pose.pose
+        pose.position.z += 2.0
+        carla_pose_transform = trans.ros_pose_to_carla_transform(pose)
+        if self.ego_vehicle is not None:
+            self.ego_vehicle.set_transform(carla_pose_transform)      
+        else:
+            print("[OnInitialposeCallback]Can't find Ego Vehicle !! Make sure it is spawned ")
 
     def init_local_agent(self, role_name, map_name, waypoints_topic_name, enable_explore):
         # rospy.loginfo("Executing stack...")
