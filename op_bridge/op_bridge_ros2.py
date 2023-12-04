@@ -172,7 +172,7 @@ class AgentHandler(object):
         except Exception as e:        
             traceback.print_exc()
     
-    def _stop_loop(self):
+    def _stop_loop(self, signum, frame):
         self.agent_loop._stop_loop()
     
     def _cleanup(self):
@@ -192,14 +192,20 @@ def main():
     
     agent_handler = AgentHandler(world_handler)
 
-    signal.signal(signal.SIGINT, AgentHandler._stop_loop)
+    old_handler = signal.signal(signal.SIGINT, agent_handler._stop_loop)
 
-    agent_handler.run_agent()
+    try:
+        agent_handler.run_agent()
+    except Exception as e:
+        traceback.print_exc()
+    
 
     print("Scenario Ended , Hero has fallen, Sayonara")  
 
-    world_handler._cleanup()
+    signal.signal(signal.SIGINT, old_handler)
+
     agent_handler._cleanup()
+    world_handler._cleanup()
 
 if __name__ == '__main__':
     main()

@@ -14,6 +14,7 @@ import os
 import subprocess
 import signal
 import threading
+import datetime
 import time
 import numpy
 import numpy as np
@@ -74,6 +75,12 @@ class Ros2Agent(AutonomousAgent):
     open_drive_map_name = None
     steering_factor = 0.45
     max_steer_angle = 0.7
+    lidar_freq = 11
+    camera_freq = 11
+    imu_freq = 51
+    can_freq = 51
+    gnss_freq = 11
+
 
     def setup(self, path_to_conf_file):
         """
@@ -87,7 +94,12 @@ class Ros2Agent(AutonomousAgent):
         self.stack_thread = None
         self.counter = 0
         self.open_drive_map_name = None
-        self.open_drive_map_data = None       
+        self.open_drive_map_data = None      
+        self.lidar_publish_prev_time = datetime.datetime.now()
+        self.camera_publish_prev_time = datetime.datetime.now()
+        self.imu_publish_prev_time = datetime.datetime.now()
+        self.can_publish_prev_time = datetime.datetime.now()
+        self.gnss_publish_prev_time = datetime.datetime.now()
                 
         # get start_script from environment
         team_code_path = os.environ['TEAM_CODE_ROOT']
@@ -100,6 +112,7 @@ class Ros2Agent(AutonomousAgent):
         # initialize ros2 node
         rclpy.init(args=None)
         self.ros2_node = rclpy.create_node("op_ros2_agent")
+        
 
         self.clock_publisher = self.ros2_node.create_publisher(Clock, "/clock", 10)
         obj_clock = Clock()
@@ -129,7 +142,8 @@ class Ros2Agent(AutonomousAgent):
         self.publisher_map = {}
         self.id_to_sensor_type_map = {}
         self.id_to_camera_info_map = {}
-        self.cv_bridge = CvBridge()
+        # self.cv_bridge = CvBridge()
+        self.cv_bridge = None
 
         # self.qos_profile = QoSProfile(depth=1)
         # self.qos_profile.durability = DurabilityPolicy.TRANSIENT_LOCAL
@@ -233,6 +247,11 @@ class Ros2Agent(AutonomousAgent):
         self.current_control = cmd
         self.step_mode_possible = True
 
+    def checkFrequecy(self, prev_time, target_freq):
+        time_delta = (datetime.datetime.now() - prev_time).microseconds/1000000.0            
+        if 1.0/time_delta >= target_freq:
+            return True        
+        return False
 
     def on_vehicle_control(self, data):
         """
@@ -307,12 +326,12 @@ class Ros2Agent(AutonomousAgent):
         sensors = [{'type': 'sensor.camera.rgb', 'x': 0.7, 'y': 0.0, 'z': 1.6, 'roll': 0.0, 'pitch': 0.0, 'yaw': 0.0,
             'width': 1280, 'height': 720, 'fov': 100, 'id': 'Center'},
             {'type': 'sensor.lidar.ray_cast', 'x': 0.0, 'y': 0.0, 'z': 2.4, 'roll': 0.0, 'pitch': 0.0,
-             'yaw': 270.0, 'id': 'LIDAR'},
+             'yaw': 90.0, 'id': 'LIDAR'},
             {'type': 'sensor.other.gnss', 'x': 0.0, 'y': 0.0, 'z': 2.4, 'id': 'GPS'},
             {'type': 'sensor.opendrive_map', 'reading_frequency': 1, 'id': 'OpenDRIVE'},
             {'type': 'sensor.speedometer', 'reading_frequency': 10, 'id': 'speed'},
             {'type': 'sensor.other.imu', 'x': 0.0, 'y': 0.0, 'z': 2.4, 'roll': 0.0, 'pitch': 0.0,
-             'yaw': 270.0, 'id': 'IMU'},
+             'yaw': 0.0, 'id': 'IMU'},
             ]
         return sensors
 
@@ -332,8 +351,13 @@ class Ros2Agent(AutonomousAgent):
         """
         Function to publish lidar data
         """
+        if self.checkFrequecy(self.lidar_publish_prev_time, self.lidar_freq) == True:
+            return
+        
+        self.lidar_publish_prev_time = datetime.datetime.now()
+
         header = self.get_header()
-        lidar_data = numpy.frombuffer(data, dtype=numpy.float32)
+        lidar_data = numpy.frombuffer(data, dtype=numpy.float32)        
 
         if lidar_data.shape[0] % 4 == 0:
             lidar_data = numpy.reshape(lidar_data, (int(lidar_data.shape[0] / 4), 4))
@@ -375,6 +399,12 @@ class Ros2Agent(AutonomousAgent):
         """
         Function to publish gnss data
         """
+
+        if self.checkFrequecy(self.gnss_publish_prev_time, self.gnss_freq) == True:
+            return
+        
+        self.gnss_publish_prev_time = datetime.datetime.now()
+
         msg = NavSatFix()
         msg.header = self.get_header()
         msg.header.frame_id = 'gnss_link'
@@ -391,6 +421,13 @@ class Ros2Agent(AutonomousAgent):
         """
         Function to publish camera data
         """
+        return
+    
+        if self.checkFrequecy(self.camera_publish_prev_time, self.camera_freq) == True:
+            return
+        
+        self.camera_publish_prev_time = datetime.datetime.now()
+    
         msg = self.cv_bridge.cv2_to_imgmsg(data, encoding='bgra8')
         # the camera data is in respect to the camera's own frame
         msg.header = self.get_header()
@@ -404,7 +441,13 @@ class Ros2Agent(AutonomousAgent):
     def publish_imu(self, sensor_id, data):
         """
         Publish IMU data 
-        """
+        """        
+
+        if self.checkFrequecy(self.imu_publish_prev_time, self.imu_freq) == True:
+            return
+        
+        self.imu_publish_prev_time = datetime.datetime.now()
+        
         imu_msg = Imu()
         imu_msg.header = self.get_header()
         imu_msg.header.frame_id = "tamagawa/imu_link"
@@ -434,6 +477,11 @@ class Ros2Agent(AutonomousAgent):
         """
         publish can data
         """    
+
+        if self.checkFrequecy(self.can_publish_prev_time, self.can_freq) == True:
+            return
+        
+        self.can_publish_prev_time = datetime.datetime.now()
 
         self.speed = data['speed']
         twist_msg = TwistWithCovariance()        
@@ -578,13 +626,14 @@ class Ros2Agent(AutonomousAgent):
         """
         Cleanup of all ROS publishers
         """        
-        if self.stack_process and self.stack_process.poll() is None:
-            # rospy.loginfo("Sending SIGTERM to stack...")
+        if self.stack_process and self.stack_process.poll() is None:            
+            print("Sending SIGTERM to stack...")
             os.killpg(os.getpgid(self.stack_process.pid), signal.SIGTERM)
-            # rospy.loginfo("Waiting for termination of stack...")
-            self.stack_process.wait()
+            print("Waiting for termination of stack...")
+            # self.stack_process.wait()
+            print("Terminated stack in 5 .. 4 .. 3 .. 2 .. 1 ")
             time.sleep(5)
-            # rospy.loginfo("Terminated stack.")
+            
 
         # rospy.loginfo("Stack is no longer running")        
         # if self.map_file_publisher:
@@ -598,7 +647,7 @@ class Ros2Agent(AutonomousAgent):
         # if self.stack_process:
         #     self.stack_process = None
 
-        #raise TypeError("Just Stop ................. Please ")
+        # raise TypeError("Just Stop ................. Please ")
         # rospy.loginfo("Cleanup finished")
 
     def _get_map_name(self, map_full_name):

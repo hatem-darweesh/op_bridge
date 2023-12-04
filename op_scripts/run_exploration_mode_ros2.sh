@@ -4,8 +4,8 @@
 # No scenario required, the ego vehicle should explore the scene 
 #############################
 
-# export SIMULATOR_LOCAL_HOST="localhost"
-export SIMULATOR_LOCAL_HOST="192.168.11.5"
+export SIMULATOR_LOCAL_HOST="localhost"
+#export SIMULATOR_LOCAL_HOST="192.168.11.5"
 export SIMULATOR_PORT="2000"
 export TEAM_AGENT=${LEADERBOARD_ROOT}/op_bridge/op_ros2_agent.py
 export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla/":"${SCENARIO_RUNNER_ROOT}":"${LEADERBOARD_ROOT}":${PYTHONPATH}
@@ -25,8 +25,11 @@ export FREE_MAP_NAME="Town01"
 # Spawn point for the autonomous agent, when BRIDGE_MODE is free 
 # "x,y,z,roll,pitch,yaw"
 # Empty string means random starting position
-#export FREE_AGENT_POSE="175.4,195.14,0,0,0,180" 
+# export FREE_AGENT_POSE="175.4,195.14,0,0,0,180" 
+# export FREE_AGENT_POSE="88.6,-226,0,0,0,0" 
 export FREE_AGENT_POSE=""
 
-gnome-terminal -- bash -c roscore
+source /opt/ros/humble/setup.bash 
+source /home/hatem/hatem-repos/autoware/carla_autoware/autoware/install/setup.bash
 python3 ${LEADERBOARD_ROOT}/op_bridge/op_bridge_ros2.py
+
