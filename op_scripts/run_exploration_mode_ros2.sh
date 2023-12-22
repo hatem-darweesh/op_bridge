@@ -7,8 +7,8 @@
 export SIMULATOR_LOCAL_HOST="localhost"
 #export SIMULATOR_LOCAL_HOST="192.168.11.5"
 export SIMULATOR_PORT="2000"
-export TEAM_AGENT=${LEADERBOARD_ROOT}/op_bridge/op_ros2_agent.py
-export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla/":"${SCENARIO_RUNNER_ROOT}":"${LEADERBOARD_ROOT}":${PYTHONPATH}
+export TEAM_AGENT=${OP_BRIDGE_ROOT}/op_bridge/op_ros2_agent.py
+export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla/":"${SCENARIO_RUNNER_ROOT}":"${OP_BRIDGE_ROOT}":${PYTHONPATH}
 export AGENT_FRAME_RATE="20"
 # Autonomous actor default role_name
 export AGENT_ROLE_NAME="hero"
@@ -25,11 +25,13 @@ export FREE_MAP_NAME="Town01"
 # Spawn point for the autonomous agent, when BRIDGE_MODE is free 
 # "x,y,z,roll,pitch,yaw"
 # Empty string means random starting position
-# export FREE_AGENT_POSE="175.4,195.14,0,0,0,180" 
+export FREE_AGENT_POSE="175.4,195.14,0,0,0,180" 
 # export FREE_AGENT_POSE="88.6,-226,0,0,0,0" 
-export FREE_AGENT_POSE=""
+# export FREE_AGENT_POSE=""
+
 
 source /opt/ros/humble/setup.bash 
-source /home/hatem/hatem-repos/autoware/carla_autoware/autoware/install/setup.bash
-python3 ${LEADERBOARD_ROOT}/op_bridge/op_bridge_ros2.py
+source ${AUTOWARE_ROOT}/install/setup.bash
+ros2 run rviz2 rviz2 -d ${OP_AGENT_ROOT}/rviz/carla_autoware.rviz -s ${OP_AGENT_ROOT}/rviz/image/autoware.png & 
+python3 ${OP_BRIDGE_ROOT}/op_bridge/op_bridge_ros2.py
 

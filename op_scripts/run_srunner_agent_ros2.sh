@@ -6,8 +6,8 @@
 
 export SIMULATOR_LOCAL_HOST="localhost"
 export SIMULATOR_PORT="2000"
-export TEAM_AGENT=${LEADERBOARD_ROOT}/op_bridge/op_ros2_agent.py
-export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla/":"${SCENARIO_RUNNER_ROOT}":"${LEADERBOARD_ROOT}":${PYTHONPATH}
+export TEAM_AGENT=${OP_BRIDGE_ROOT}/op_bridge/op_ros2_agent.py
+export PYTHONPATH="${CARLA_ROOT}/PythonAPI/carla/":"${SCENARIO_RUNNER_ROOT}":"${OP_BRIDGE_ROOT}":${PYTHONPATH}
 export AGENT_FRAME_RATE="20"
 # Autonomous actor default role_name
 export AGENT_ROLE_NAME="hero"
@@ -29,4 +29,4 @@ export FREE_AGENT_POSE=""
 
 gnome-terminal -- bash -c roscore
 
-python ${LEADERBOARD_ROOT}/op_bridge/op_bridge.py
+python ${OP_BRIDGE_ROOT}/op_bridge/op_bridge.py
