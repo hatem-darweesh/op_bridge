@@ -29,10 +29,10 @@ export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla/dist/carla-0.9.15-py
 ```
 
 **How to run the bridge:**
-1-Run CARLA simulator 0.9.15 
-2-Run one of the following options. 
-3-In case of run_srunner_agent.sh, scneario must be started before running the bridge. 
-4-The bridge run script will run the op_agent
+1. Run CARLA simulator 0.9.15 
+2. Run one of the following options. 
+3. In case of run_srunner_agent.sh, scneario must be started before running the bridge. 
+4. The bridge run script will run the op_agent
 
 **Options(ROS2):** 
 ```
@@ -42,8 +42,8 @@ export PYTHONPATH=$PYTHONPATH:${CARLA_ROOT}/PythonAPI/carla/dist/carla-0.9.15-py
 ```
 
 **Run the simulator on another PC**
-1- Make sure that both the Simulator PC and the Autoware PC are on the same network and you know the IP of each and able to ping both. 
-2- In the file "run_exploration_mode_ros2.sh" replace "localhost" with the simulator PC IP address. 
+1. Make sure that both the Simulator PC and the Autoware PC are on the same network and you know the IP of each and able to ping both. 
+2. In the file "run_exploration_mode_ros2.sh" replace "localhost" with the simulator PC IP address. 
 Example: 
 ```
 //export SIMULATOR_LOCAL_HOST="localhost"
