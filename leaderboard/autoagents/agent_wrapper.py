@@ -113,7 +113,7 @@ class AgentWrapper(object):
                     bp.set_attribute('channels', str(64))
                     bp.set_attribute('upper_fov', str(10))
                     bp.set_attribute('lower_fov', str(-30))                    
-                    bp.set_attribute('points_per_second', str(1200000))
+                    bp.set_attribute('points_per_second', str(600000))
                     bp.set_attribute('atmosphere_attenuation_rate', str(0.004))
                     bp.set_attribute('dropoff_general_rate', str(0.45))
                     bp.set_attribute('dropoff_intensity_limit', str(0.8))

@@ -75,10 +75,10 @@ class Ros2Agent(AutonomousAgent):
     open_drive_map_name = None
     steering_factor = 0.45
     max_steer_angle = 0.7
-    lidar_freq = 15
-    camera_freq = 15
-    imu_freq = 25
-    can_freq = 25
+    lidar_freq = 11
+    camera_freq = 11
+    imu_freq = 50
+    can_freq = 50
     gnss_freq = 2
 
 
