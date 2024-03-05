@@ -19,7 +19,7 @@ export AGENT_ROLE_NAME="hero"
 export OP_BRIDGE_MODE="srunner" 
 
 # CARLA town name or custom OpenDRIVE absolute path, when BRIDGE_MODE is free 
-export FREE_MAP_NAME="Town01" 
+export FREE_MAP_NAME="Town03" 
 
 # Spawn point for the autonomous agent, when BRIDGE_MODE is free 
 # "x,y,z,roll,pitch,yaw"
@@ -27,6 +27,8 @@ export FREE_MAP_NAME="Town01"
 #export FREE_AGENT_POSE="175.4,195.14,0,0,0,180" 
 export FREE_AGENT_POSE=""
 
-gnome-terminal -- bash -c roscore
 
-python ${OP_BRIDGE_ROOT}/op_bridge/op_bridge.py
+source /opt/ros/humble/setup.bash 
+source ${AUTOWARE_ROOT}/install/setup.bash
+ros2 run rviz2 rviz2 -d ${OP_AGENT_ROOT}/rviz/carla_autoware.rviz -s ${OP_AGENT_ROOT}/rviz/image/autoware.png & 
+python3 ${OP_BRIDGE_ROOT}/op_bridge/op_bridge_ros2.py

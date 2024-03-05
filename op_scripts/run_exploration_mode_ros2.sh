@@ -20,14 +20,14 @@ export AGENT_ROLE_NAME="hero"
 export OP_BRIDGE_MODE="free" 
 
 # CARLA town name or custom OpenDRIVE absolute path, when BRIDGE_MODE is free 
-export FREE_MAP_NAME="Town01" 
+export FREE_MAP_NAME="Town03" 
 
 # Spawn point for the autonomous agent, when BRIDGE_MODE is free 
 # "x,y,z,roll,pitch,yaw"
 # Empty string means random starting position
-export FREE_AGENT_POSE="175.4,195.14,0,0,0,180" 
+# export FREE_AGENT_POSE="175.4,195.14,0,0,0,180" 
 # export FREE_AGENT_POSE="88.6,-226,0,0,0,0" 
-# export FREE_AGENT_POSE=""
+export FREE_AGENT_POSE=""
 
 
 source /opt/ros/humble/setup.bash 
