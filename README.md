@@ -1,5 +1,7 @@
 # op_bridge - CARLA OpenPlanner Bridge
-OpenPlanner ROS based bridge for CARLA Simulator and Scenario Runner 
+OpenPlanner ROS based bridge for CARLA Simulator and Scenario Runn
+![CARLA - OpenPlanner Universe - Bridge - Setup and Run - ubuntu 22 04 -2023](https://github.com/user-attachments/assets/492041bd-4165-46cd-8d7e-dbf847b1f043)
+er 
 
 ## Last Update: December 2023, Working on Ubuntu 22.04 and ROS2 humble. Thanks to https://github.com/gezp this is possible. 
 - Make sure to Download the Python egg for 3.10 from [here](https://github.com/gezp/carla_ros/releases/tag/carla-0.9.15-ubuntu-22.04). 
